@@ -1,0 +1,33 @@
+# Use an official Flutter runtime as a parent image
+FROM google/dart:latest
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# download Flutter SDK from Flutter Github repo
+RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
+
+# Set flutter environment path
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+# Run flutter doctor
+RUN flutter doctor
+
+# Enable flutter web
+RUN flutter channel master
+RUN flutter upgrade
+RUN flutter config --enable-web
+# Install dependencies
+RUN flutter pub get
+
+# Build the Flutter web app
+RUN flutter build web
+
+# Expose port 80
+EXPOSE 80
+
+# Run your Flutter web app when the container launches
+CMD [ "flutter", "run", "-d", "web", "--web-hostname", "0.0.0.0", "--web-port", "80" ]
